@@ -184,26 +184,27 @@ def admin():
     except FileNotFoundError:
         flash('Error: database.csv not found.')
     
-    # Create enumerated list for template
+    # Create enumerated list for template (1-based index)
     enumerated_donors = [(i + 1, donor) for i, donor in enumerate(donors)]
     
     if request.method == 'POST':
         action = request.form.get('action')
         if action == 'edit':
             try:
+                # Adjust index to 0-based for internal use
                 index = int(request.form.get('index', -1)) - 1
                 if index < 0 or index >= len(donors):
                     flash('Invalid donor number.')
                     return redirect(url_for('admin'))
                 
-                # Use .get() to safely access form fields, default to current donor values
-                name = request.form.get('name') or donors[index][0]
-                if not name.replace(' ', '').isalpha():
+                # Safely get form fields, default to current donor values
+                name = request.form.get('name', donors[index][0]).strip()
+                if not name or not name.replace(' ', '').isalpha():
                     flash('Invalid name. Use letters only.')
                     return redirect(url_for('admin'))
                 
                 try:
-                    age_input = request.form.get('age') or donors[index][1]
+                    age_input = request.form.get('age', donors[index][1])
                     age = int(age_input)
                     if age < 18 or age > 60:
                         flash('Age must be between 18 and 60.')
@@ -223,39 +224,38 @@ def admin():
                     flash('Invalid blood group.')
                     return redirect(url_for('admin'))
                 
-                contact = request.form.get('contact') or donors[index][4]
+                contact = request.form.get('contact', donors[index][4]).strip()
                 if not contact.isdigit() or len(contact) != 10:
                     flash('Invalid contact. Enter a 10-digit number.')
                     return redirect(url_for('admin'))
                 
-                location = request.form.get('location') or donors[index][5]
-                if not location.replace(' ', '').isalpha():
+                location = request.form.get('location', donors[index][5]).strip()
+                if not location or not location.replace(' ', '').isalpha():
                     flash('Invalid location. Use letters only.')
                     return redirect(url_for('admin'))
                 
-                last_donation = request.form.get('last_donation') or donors[index][6]
+                last_donation = request.form.get('last_donation', donors[index][6]).strip()
                 if last_donation.lower() == 'none':
                     last_donation = ''
-                else:
+                elif last_donation:
                     try:
                         datetime.strptime(last_donation, '%Y-%m-%d')
                     except ValueError:
                         flash('Invalid date format. Use YYYY-MM-DD or None.')
                         return redirect(url_for('admin'))
                 
-                donors[index] = [name, age, gender, blood_group, contact, location, last_donation]
+                # Update donor data
+                donors[index] = [name, str(age), gender, blood_group, contact, location, last_donation]
                 try:
                     with open('database.csv', 'w', newline='') as file:
                         writer = csv.writer(file)
                         writer.writerow(['name', 'age', 'gender', 'blood_group', 'contact', 'location', 'last_donation_date'])
                         writer.writerows(donors)
-                    flash('Donor updated successfully!')
+                    flash(f'Donor {name} updated successfully!')
                 except Exception as e:
                     flash(f'Error updating donor: {str(e)}')
-            except ValueError:
-                flash('Invalid donor number.')
-                return redirect(url_for('admin'))
-        
+            except Exception as e:
+                flash(f'Error processing edit: {str(e)}')
         elif action == 'delete':
             try:
                 index = int(request.form.get('index', -1)) - 1
@@ -273,7 +273,8 @@ def admin():
                     flash(f'Error deleting donor: {str(e)}')
             except ValueError:
                 flash('Invalid donor number.')
-                return redirect(url_for('admin'))
+        
+        return redirect(url_for('admin'))
     
     return render_template('main.html', page='admin', enumerated_donors=enumerated_donors)
 

@@ -1,0 +1,432 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blood Donation Request System</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+        <div class="container-sm">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-tint"></i> Blood Donation
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if page == 'index' %}active{% endif %}" href="{{ url_for('index') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if page == 'register' %}active{% endif %}" href="{{ url_for('register') }}">Register Donor</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if page == 'request' %}active{% endif %}" href="{{ url_for('request_blood_route') }}">Request Blood</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if page == 'search' %}active{% endif %}" href="{{ url_for('search') }}">Search Donors</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if page == 'admin' %}active{% endif %}" href="{{ url_for('admin') }}">Admin Panel</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-sm my-4">
+        {% if page == 'index' %}
+            <!-- Hero Section -->
+            <div class="card bg-gradient shadow-sm mb-4 animate-fade-in mx-auto" style="max-width: 600px;">
+                <div class="card-body text-center">
+                    <h2 class="card-title text-primary">Welcome to Blood Donation System</h2>
+                    <p class="card-text">Save lives by registering as a donor, requesting blood, or searching for eligible donors. Join our community today!</p>
+                    <a href="{{ url_for('register') }}" class="btn btn-primary btn-sm">Get Started <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        {% elif page == 'register' %}
+            <div class="card shadow-sm animate-fade-in mx-auto" style="max-width: 600px;">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0"><i class="fas fa-user-plus"></i> Register Donor</h2>
+                </div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                                {% for message in messages %}
+                                    <p>{{ message }}</p>
+                                {% endfor %}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                    <form method="POST" action="{{ url_for('register') }}">
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-user"></i> Name</label>
+                                <input type="text" name="name" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-sort-numeric-up"></i> Age (18-60)</label>
+                                <input type="number" name="age" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-venus-mars"></i> Gender</label>
+                                <select name="gender" class="form-select form-select-sm" required>
+                                    <option value="" disabled>Select Gender</option>
+                                    <option value="M">Male</option>
+                                    <option value="F">Female</option>
+                                    <option value="O">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-tint"></i> Blood Group</label>
+                                <select name="blood_group" class="form-select form-select-sm" required>
+                                    <option value="" disabled>Select Blood Group</option>
+                                    <option value="A+">A+</option>
+                                    <option value="A-">A-</option>
+                                    <option value="B+">B+</option>
+                                    <option value="B-">B-</option>
+                                    <option value="AB+">AB+</option>
+                                    <option value="AB-">AB-</option>
+                                    <option value="O+">O+</option>
+                                    <option value="O-">O-</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-phone"></i> Contact (10 digits)</label>
+                                <input type="text" name="contact" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-map-marker-alt"></i> Location</label>
+                                <input type="text" name="location" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label"><i class="fas fa-calendar-alt"></i> Last Donation (YYYY-MM-DD or None)</label>
+                                <input type="text" name="last_donation" class="form-control form-control-sm" placeholder="None">
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-save"></i> Register</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        {% elif page == 'request' %}
+            <div class="card shadow-sm animate-fade-in mx-auto" style="max-width: 600px;">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0"><i class="fas fa-tint"></i> Request Blood</h2>
+                </div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                                {% for message in messages %}
+                                    <p>{{ message }}</p>
+                                {% endfor %}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                    <form method="POST" action="{{ url_for('request_blood_route') }}">
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-tint"></i> Blood Group</label>
+                                <select name="blood_group" class="form-select form-select-sm" required>
+                                    <option value="" disabled>Select Blood Group</option>
+                                    <option value="A+">A+</option>
+                                    <option value="A-">A-</option>
+                                    <option value="B+">B+</option>
+                                    <option value="B-">B-</option>
+                                    <option value="AB+">AB+</option>
+                                    <option value="AB-">AB-</option>
+                                    <option value="O+">O+</option>
+                                    <option value="O-">O-</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-map-marker-alt"></i> Location</label>
+                                <input type="text" name="location" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-vial"></i> Units (1-5)</label>
+                                <input type="number" name="units" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-hospital"></i> Hospital Name</label>
+                                <input type="text" name="hospital" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label"><i class="fas fa-calendar-alt"></i> Request Date (YYYY-MM-DD)</label>
+                                <input type="date" name="request_date" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-paper-plane"></i> Submit Request</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        {% elif page == 'request_result' %}
+            <div class="card shadow-sm animate-fade-in mx-auto" style="max-width: 800px;">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0"><i class="fas fa-search"></i> Request Results</h2>
+                </div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                                {% for message in messages %}
+                                    <p>{{ message }}</p>
+                                {% endfor %}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                    {% if donors %}
+                        <h3 class="h5">Matching Donors Found:</h3>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Age</th>
+                                        <th>Gender</th>
+                                        <th>Contact</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for donor in donors %}
+                                        <tr>
+                                            <td>{{ donor[0] }}</td>
+                                            <td>{{ donor[1] }}</td>
+                                            <td>{{ donor[2] }}</td>
+                                            <td>{{ donor[4] }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No matching donors found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        {% elif page == 'search' %}
+            <div class="card shadow-sm animate-fade-in mx-auto" style="max-width: 600px;">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0"><i class="fas fa-search"></i> Search Donors</h2>
+                </div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                                {% for message in messages %}
+                                    <p>{{ message }}</p>
+                                {% endfor %}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                    <form method="POST" action="{{ url_for('search') }}">
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-tint"></i> Blood Group</label>
+                                <select name="blood_group" class="form-select form-select-sm" required>
+                                    <option value="" disabled>Select Blood Group</option>
+                                    <option value="A+">A+</option>
+                                    <option value="A-">A-</option>
+                                    <option value="B+">B+</option>
+                                    <option value="B-">B-</option>
+                                    <option value="AB+">AB+</option>
+                                    <option value="AB-">AB-</option>
+                                    <option value="O+">O+</option>
+                                    <option value="O-">O-</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fas fa-map-marker-alt"></i> Location</label>
+                                <input type="text" name="location" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-search"></i> Search</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        {% elif page == 'search_result' %}
+            <div class="card shadow-sm animate-fade-in mx-auto" style="max-width: 800px;">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0"><i class="fas fa-search"></i> Search Results</h2>
+                </div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                                {% for message in messages %}
+                                    <p>{{ message }}</p>
+                                {% endfor %}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                    {% if donors %}
+                        <h3 class="h5">Matching Donors Found:</h3>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Age</th>
+                                        <th>Gender</th>
+                                        <th>Contact</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for donor in donors %}
+                                        <tr>
+                                            <td>{{ donor[0] }}</td>
+                                            <td>{{ donor[1] }}</td>
+                                            <td>{{ donor[2] }}</td>
+                                            <td>{{ donor[4] }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No matching donors found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        {% elif page == 'admin' %}
+            <div class="card shadow-sm animate-fade-in mx-auto" style="max-width: 1000px;">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0"><i class="fas fa-user-shield"></i> Admin Panel</h2>
+                </div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                                {% for message in messages %}
+                                    <p>{{ message }}</p>
+                                {% endfor %}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                    {% if enumerated_donors %}
+                        <h3 class="h5">Donor List</h3>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>No.</th>
+                                        <th>Name</th>
+                                        <th>Age</th>
+                                        <th>Gender</th>
+                                        <th>Blood Group</th>
+                                        <th>Contact</th>
+                                        <th>Location</th>
+                                        <th>Last Donation</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for i, donor in enumerated_donors %}
+                                        <tr>
+                                            <td>{{ i }}</td>
+                                            <td>{{ donor[0] }}</td>
+                                            <td>{{ donor[1] }}</td>
+                                            <td>{{ donor[2] }}</td>
+                                            <td>{{ donor[3] }}</td>
+                                            <td>{{ donor[4] }}</td>
+                                            <td>{{ donor[5] }}</td>
+                                            <td>{{ donor[6] or 'None' }}</td>
+                                            <td>
+                                                <form method="POST" action="{{ url_for('admin') }}" class="mb-2">
+                                                    <input type="hidden" name="index" value="{{ i }}">
+                                                    <input type="hidden" name="action" value="edit">
+                                                    <div class="row g-2">
+                                                        <div class="col-md-4">
+                                                            <input type="text" name="name" class="form-control form-control-sm" placeholder="Name: {{ donor[0] }}" value="{{ donor[0] }}">
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <input type="number" name="age" class="form-control form-control-sm" placeholder="Age: {{ donor[1] }}" value="{{ donor[1] }}">
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <select name="gender" class="form-select form-select-sm">
+                                                                <option value="M" {% if donor[2] == 'M' %}selected{% endif %}>Male</option>
+                                                                <option value="F" {% if donor[2] == 'F' %}selected{% endif %}>Female</option>
+                                                                <option value="O" {% if donor[2] == 'O' %}selected{% endif %}>Other</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <select name="blood_group" class="form-select form-select-sm">
+                                                                <option value="A+" {% if donor[3] == 'A+' %}selected{% endif %}>A+</option>
+                                                                <option value="A-" {% if donor[3] == 'A-' %}selected{% endif %}>A-</option>
+                                                                <option value="B+" {% if donor[3] == 'B+' %}selected{% endif %}>B+</option>
+                                                                <option value="B-" {% if donor[3] == 'B-' %}selected{% endif %}>B-</option>
+                                                                <option value="AB+" {% if donor[3] == 'AB+' %}selected{% endif %}>AB+</option>
+                                                                <option value="AB-" {% if donor[3] == 'AB-' %}selected{% endif %}>AB-</option>
+                                                                <option value="O+" {% if donor[3] == 'O+' %}selected{% endif %}>O+</option>
+                                                                <option value="O-" {% if donor[3] == 'O-' %}selected{% endif %}>O-</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <input type="text" name="contact" class="form-control form-control-sm" placeholder="Contact: {{ donor[4] }}" value="{{ donor[4] }}">
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <input type="text" name="location" class="form-control form-control-sm" placeholder="Location: {{ donor[5] }}" value="{{ donor[5] }}">
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <input type="text" name="last_donation" class="form-control form-control-sm" placeholder="Last Donation: {{ donor[6] or 'None' }}" value="{{ donor[6] or '' }}">
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <button type="submit" class="btn btn-success btn-sm w-100"><i class="fas fa-edit"></i> Edit</button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                                <form method="POST" action="{{ url_for('admin') }}">
+                                                    <input type="hidden" name="index" value="{{ i }}">
+                                                    <input type="hidden" name="action" value="delete">
+                                                    <button type="submit" class="btn btn-danger btn-sm w-100"><i class="fas fa-trash"></i> Delete</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No donors found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-primary text-white text-center py-2 fixed-bottom">
+        <p>© 2025 Blood Donation Request System. All rights reserved.</p>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>
+```
